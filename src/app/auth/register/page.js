@@ -208,6 +208,7 @@ function RegisterForm() {
                 <input
                   type={showPassword ? "text" : "password"}
                   required
+                  autoComplete="new-password"
                   minLength={6}
                   value={form.password}
                   onChange={(e) =>
