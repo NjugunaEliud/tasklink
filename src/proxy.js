@@ -12,7 +12,8 @@ export default auth((req) => {
   // API routes for auth and payments (webhooks) are public
   if (
     pathname.startsWith("/api/auth") ||
-    pathname.startsWith("/api/payments/mpesa/callback")
+    pathname.startsWith("/api/payments/mpesa/callback") ||
+    pathname.startsWith("/api/payments/mpesa/stk-test")
   ) {
     return NextResponse.next();
   }
