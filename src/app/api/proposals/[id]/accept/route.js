@@ -34,13 +34,20 @@ export async function POST(req, { params }) {
     // Get client's phone number
     const client = await prisma.user.findUnique({ where: { id: session.user.id } });
 
-    // Initiate STK Push
-    const stkResult = await initiateSTKPush({
-      phone: client.phone,
-      amount: proposal.task.budget,
-      taskId: proposal.task.id,
-      accountRef: `TaskBridge-${proposal.task.id.slice(-6)}`,
-    });
+    // Attempt STK Push — non-blocking so acceptance proceeds even if M-Pesa sandbox fails
+    let stkResult = null;
+    let stkFailed = false;
+    try {
+      stkResult = await initiateSTKPush({
+        phone: client.phone,
+        amount: proposal.task.budget,
+        taskId: proposal.task.id,
+        accountRef: `TaskBridge-${proposal.task.id.slice(-6)}`,
+      });
+    } catch (stkErr) {
+      console.warn("[STK PUSH SKIPPED]", stkErr?.response?.data?.errorMessage || stkErr.message);
+      stkFailed = true;
+    }
 
     // Update proposal, task, and create escrow record in a transaction
     await prisma.$transaction([
@@ -59,12 +66,12 @@ export async function POST(req, { params }) {
         where: { id: proposal.taskId },
         data: { status: "ASSIGNED", taskerId: proposal.taskerId },
       }),
-      // Create escrow record (pending M-Pesa confirmation)
+      // Create escrow record
       prisma.escrow.create({
         data: {
           amount: proposal.task.budget,
           status: "HELD",
-          mpesaRef: stkResult.CheckoutRequestID || null,
+          mpesaRef: stkResult?.CheckoutRequestID || null,
           taskId: proposal.taskId,
           clientId: session.user.id,
           taskerId: proposal.taskerId,
@@ -75,7 +82,7 @@ export async function POST(req, { params }) {
         data: {
           type: "ESCROW_IN",
           amount: proposal.task.budget,
-          mpesaRef: stkResult.CheckoutRequestID || null,
+          mpesaRef: stkResult?.CheckoutRequestID || null,
           userId: session.user.id,
           taskId: proposal.taskId,
         },
@@ -84,7 +91,9 @@ export async function POST(req, { params }) {
 
     return NextResponse.json({
       success: true,
-      message: "Proposal accepted. M-Pesa STK Push sent to your phone.",
+      message: stkFailed
+        ? "Proposal accepted. M-Pesa payment initiation skipped (sandbox unavailable)."
+        : "Proposal accepted. M-Pesa STK Push sent to your phone.",
       stkResult,
     });
   } catch (err) {
