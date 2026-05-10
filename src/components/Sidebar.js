@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import {
   Briefcase,
   LayoutDashboard,
@@ -38,10 +38,9 @@ const adminNav = [
   { href: "/admin/transactions", label: "Transactions", icon: DollarSign },
 ];
 
-export default function Sidebar({ role }) {
+export default function Sidebar({ role, userName }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const { data: session } = useSession();
 
   const navItems =
     role === "CLIENT"
@@ -108,7 +107,7 @@ export default function Sidebar({ role }) {
             {role}
           </span>
           <p className="text-white font-medium text-sm mt-0.5 truncate">
-            {session?.user?.name}
+            {userName}
           </p>
         </div>
 

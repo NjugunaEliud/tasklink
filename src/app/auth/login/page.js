@@ -176,7 +176,7 @@ function LoginForm() {
           </form>
 
           <p className="text-center text-gray-400 text-xs mt-8">
-            Protected by NextAuth · TaskBridge © {new Date().getFullYear()}
+            TaskBridge © {new Date().getFullYear()}
           </p>
         </div>
       </div>

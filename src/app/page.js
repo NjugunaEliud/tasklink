@@ -16,9 +16,9 @@ import {
 
 export default function HomePage() {
   const stats = [
-    { label: "Active Taskers", value: "2,400+", icon: Users },
-    { label: "Tasks Completed", value: "18,000+", icon: CheckCircle },
-    { label: "Revenue Processed", value: "KES 45M+", icon: TrendingUp },
+    { label: "Active Taskers", value: "240+", icon: Users },
+    { label: "Tasks Completed", value: "130+", icon: CheckCircle },
+    { label: "Revenue Processed", value: "KES 20,000+", icon: TrendingUp },
     { label: "Avg. Rating", value: "4.8 / 5", icon: Star },
   ];
 
@@ -115,6 +115,9 @@ export default function HomePage() {
           </div>
           <Link href="/auth/register?role=CLIENT" className="inline-flex items-center gap-2 bg-[#eab308] hover:bg-[#ca8a04] text-[#0f172a] font-bold px-10 py-4 rounded-xl text-lg transition-all shadow-lg">
             Post a task <ArrowRight className="w-5 h-5" />
+          </Link>
+           <Link href="/auth/register?role=TASKER" className="inline-flex items-center gap-2 text-white font-bold px-10 py-4 rounded-xl text-lg transition-all">
+            Become a Tasker <ArrowRight className="w-5 h-5" />
           </Link>
           <p className="text-white/60 text-sm mt-4">Takes less than 2 minutes · Free to post</p>
         </div>
