@@ -9,6 +9,7 @@ import {
   Star,
   ArrowRight,
   Clock,
+  Search,
 } from "lucide-react";
 
 const proposalStatusColors = {
@@ -21,7 +22,7 @@ export default async function TaskerDashboard() {
   const session = await auth();
   const userId = session.user.id;
 
-  const [proposals, assignedTasks, earnings, reviews] = await Promise.all([
+  const [proposals, assignedTasks, earnings, reviews, openTasks] = await Promise.all([
     prisma.proposal.findMany({
       where: { taskerId: userId },
       take: 5,
@@ -40,6 +41,16 @@ export default async function TaskerDashboard() {
     prisma.review.findMany({
       where: { taskerId: userId },
       select: { rating: true },
+    }),
+    prisma.task.findMany({
+      where: { status: "OPEN" },
+      orderBy: { createdAt: "desc" },
+      take: 4,
+      include: {
+        category: true,
+        client: { select: { name: true } },
+        _count: { select: { proposals: true } },
+      },
     }),
   ]);
 
@@ -115,7 +126,7 @@ export default async function TaskerDashboard() {
           </div>
           <div className="p-4 border-t border-gray-100">
             <Link
-              href="/tasks"
+              href="/tasker/browse"
               className="w-full flex items-center justify-center gap-2 bg-[#1a3a5c] text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-[#1e4d8c] transition-colors"
             >
               Browse Open Tasks
@@ -158,6 +169,56 @@ export default async function TaskerDashboard() {
               ))
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Available Tasks */}
+      <div className="mt-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+          <div>
+            <h2 className="font-bold text-gray-900">Available Tasks</h2>
+            <p className="text-sm text-gray-400 mt-0.5">Latest open tasks you can apply for</p>
+          </div>
+          <Link
+            href="/tasker/browse"
+            className="flex items-center gap-1.5 text-sm text-blue-600 hover:underline"
+          >
+            <Search className="w-3.5 h-3.5" />
+            Browse all
+          </Link>
+        </div>
+        {openTasks.length === 0 ? (
+          <div className="p-8 text-center text-gray-400 text-sm">
+            No open tasks right now. Check back soon!
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 divide-x divide-y divide-gray-100">
+            {openTasks.map((task) => (
+              <Link
+                key={task.id}
+                href={`/tasks/${task.id}`}
+                className="p-5 hover:bg-gray-50 transition-colors flex flex-col gap-2"
+              >
+                <span className="text-xs bg-blue-50 text-blue-600 px-2.5 py-0.5 rounded-full font-medium self-start">
+                  {task.category?.name}
+                </span>
+                <h3 className="font-semibold text-gray-900 text-sm line-clamp-2">{task.title}</h3>
+                <div className="flex items-center justify-between text-xs text-gray-400 mt-auto pt-2 border-t border-gray-100">
+                  <span className="font-bold text-gray-700">KES {task.budget.toLocaleString()}</span>
+                  <span>{task._count.proposals} bids</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+        <div className="p-4 border-t border-gray-100">
+          <Link
+            href="/tasker/browse"
+            className="w-full flex items-center justify-center gap-2 bg-[#2563eb] text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-[#1d4ed8] transition-colors"
+          >
+            Browse All Open Tasks
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </div>
     </div>

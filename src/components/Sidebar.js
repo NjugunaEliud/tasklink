@@ -25,7 +25,7 @@ const clientNav = [
 
 const taskerNav = [
   { href: "/tasker/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/tasks", label: "Browse Tasks", icon: ClipboardList },
+  { href: "/tasker/browse", label: "Browse Tasks", icon: ClipboardList },
   { href: "/tasker/proposals", label: "My Proposals", icon: Star },
   { href: "/tasker/tasks", label: "Assigned Tasks", icon: Briefcase },
   { href: "/tasker/earnings", label: "Earnings", icon: DollarSign },
